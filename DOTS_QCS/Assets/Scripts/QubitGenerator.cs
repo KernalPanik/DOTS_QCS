@@ -19,6 +19,12 @@ public struct QuantumState : IComponentData
     public float Beta;
 }
 
+public struct SphericalCoords
+{
+    public float theta;
+    public float phi;
+}
+
 //TODO: Physical-To-Quantum Transform system
 //TODO: Proper Qubit Generator
 //TODO: X Gate system
@@ -33,7 +39,9 @@ public class PhysicalToQuantumSystem : ComponentSystem
     {
         Entities.ForEach((ref Rotation rotation, ref QuantumState quantumState) => 
         {
-            
+            var coords = ExtraMath.QuaternionToSpherical(rotation.Value);
+            quantumState.Alpha = math.cos(coords.theta / 2);
+            quantumState.Beta = math.sqrt(1 - math.pow(quantumState.Alpha, 2));
         });
     }
 }
@@ -43,9 +51,13 @@ public static class ExtraMath
     /// <summary>
     /// a function to convert a given quaternion into vector of longitude and lattitude
     /// </summary>
-    public static Vector2 QuaternionToLonLat(quaternion quaternion)
+    public static SphericalCoords QuaternionToSpherical(quaternion quaternion)
     {
-        throw new System.NotImplementedException();
+        SphericalCoords coords = new SphericalCoords();
+        //TODO: Verify if such conversion is correct
+        coords.theta = math.atan2(quaternion.value.y, quaternion.value.w);
+        coords.phi = math.acos(quaternion.value.z / 1); // since we're working with a unit sphere, our radius is equal to 1
+        return coords;
     }
 }
 
