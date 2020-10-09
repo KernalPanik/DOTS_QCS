@@ -2,6 +2,7 @@
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
+using Unity.Jobs;
 
 public struct Energy : IComponentData
 {
@@ -10,7 +11,12 @@ public struct Energy : IComponentData
 
 public struct QuantumState : IComponentData
 {
-    public float Value;
+    /// <summary>
+    /// Alpha amplitude describes state |0>
+    /// Beta amplitude describes state |1>
+    /// </summary>
+    public float Alpha;
+    public float Beta;
 }
 
 //TODO: Physical-To-Quantum Transform system
@@ -19,12 +25,27 @@ public struct QuantumState : IComponentData
 
 public class PhysicalToQuantumSystem : ComponentSystem
 {
+    /// <summary>
+    /// Calculate quantum state amplitudes based on the rotation of the qubit
+    /// cos(theta/2)* state_0 + e^(i*fi)*sin(theta/2)* state_1
+    /// </summary>
     protected override void OnUpdate()
     {
-        Entities.ForEach((ref Energy energy, ref QuantumState quantumState) => 
+        Entities.ForEach((ref Rotation rotation, ref QuantumState quantumState) => 
         {
-
+            
         });
+    }
+}
+
+public static class ExtraMath
+{
+    /// <summary>
+    /// a function to convert a given quaternion into vector of longitude and lattitude
+    /// </summary>
+    public static Vector2 QuaternionToLonLat(quaternion quaternion)
+    {
+        throw new System.NotImplementedException();
     }
 }
 
@@ -35,16 +56,12 @@ public class QubitGenerator : MonoBehaviour
     private void Start()
     {
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-
         EntityArchetype archetype = CreateQubitArchetype(entityManager);
-
         Entity entity = entityManager.CreateEntity(archetype);
-        // TODO: Implement a quick degree to radian conversion extension
     }
 
     private EntityArchetype CreateQubitArchetype(EntityManager entityManager)
     {
-        //TODO: What should be done in such a case? Create an archetype with a lot of different components, or create a signle component to hold them all?
         return entityManager.CreateArchetype(
            typeof(Translation),
            typeof(Rotation),
