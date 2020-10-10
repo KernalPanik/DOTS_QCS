@@ -3,6 +3,7 @@ using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
 using Unity.Jobs;
+using Unity.Collections;
 
 public struct Energy : IComponentData
 {
@@ -19,14 +20,28 @@ public struct QuantumState : IComponentData
     public float Beta;
 }
 
-public struct SphericalCoords
+public struct GateComponent : IComponentData
 {
-    public float theta;
-    public float phi;
+    public int ExecutionOrder;
 }
 
-//TODO: Physical-To-Quantum Transform system
-//TODO: Proper Qubit Generator
+public struct NewGateComponent : IComponentData
+{
+    public int ExecutionOrder;
+    public quaternion GateQuaternion;
+}
+
+public struct QubitComponent : IComponentData
+{
+    public int QubitId;
+}
+
+public struct SphericalCoords
+{
+    public float Theta;
+    public float Phi;
+}
+
 //TODO: X Gate system
 
 public class PhysicalToQuantumSystem : ComponentSystem
@@ -37,12 +52,47 @@ public class PhysicalToQuantumSystem : ComponentSystem
     /// </summary>
     protected override void OnUpdate()
     {
-        Entities.ForEach((ref Rotation rotation, ref QuantumState quantumState) => 
+        Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) => 
         {
             var coords = ExtraMath.QuaternionToSpherical(rotation.Value);
-            quantumState.Alpha = math.cos(coords.theta / 2);
+            quantumState.Alpha = math.cos(coords.Theta / 2);
             quantumState.Beta = math.sqrt(1 - math.pow(quantumState.Alpha, 2));
         });
+    }
+}
+
+public class QuantumCircuitSystem : ComponentSystem
+{
+    protected override void OnUpdate()
+    {
+        Entities.ForEach((ref Rotation rotation, ref QuantumState quantumState, ref QubitComponent qubitComponent)=>
+        {
+            // Here we can call gates and they will modify our qubits!
+            // But as you see, the approach is super lame :(
+            if(qubitComponent.QubitId == 0)
+                Gates.ApplyI(ref rotation);
+            if (qubitComponent.QubitId == 1)
+                Gates.ApplyX(ref rotation);
+        });
+    }
+}
+
+public static class Gates
+{
+    /// <summary>
+    /// Apply identity matrix (nop)
+    /// </summary>
+    public static void ApplyI(ref Rotation qubitRotation)
+    {
+        qubitRotation.Value = math.mul(math.normalizesafe(qubitRotation.Value), quaternion.identity);
+    }
+
+    /// <summary>
+    /// Apply X gate (NOT gate)
+    /// </summary>
+    public static void ApplyX(ref Rotation qubitRotation)
+    {
+        qubitRotation.Value = math.mul(math.normalizesafe(qubitRotation.Value), quaternion.RotateX(math.PI));
     }
 }
 
@@ -55,8 +105,8 @@ public static class ExtraMath
     {
         SphericalCoords coords = new SphericalCoords();
         //TODO: Verify if such conversion is correct
-        coords.theta = math.atan2(quaternion.value.y, quaternion.value.w);
-        coords.phi = math.acos(quaternion.value.z / 1); // since we're working with a unit sphere, our radius is equal to 1
+        coords.Theta = math.atan2(quaternion.value.y, quaternion.value.w);
+        coords.Phi = math.acos(quaternion.value.z / 1); // since we're working with a unit sphere, our radius is equal to 1
         return coords;
     }
 }
@@ -64,12 +114,23 @@ public static class ExtraMath
 public class QubitGenerator : MonoBehaviour
 {
     private EntityManager entityManager;
+    private DynamicBuffer<Entity> qubits;
+    private int QubitCount = 0;
 
     private void Start()
     {
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        CreateQubit(entityManager);
+        CreateQubit(entityManager);
+    }
+
+    public Entity CreateQubit(EntityManager entityManager)
+    {
         EntityArchetype archetype = CreateQubitArchetype(entityManager);
-        Entity entity = entityManager.CreateEntity(archetype);
+        var qubit = entityManager.CreateEntity(archetype);
+        entityManager.AddComponentData(qubit, new QubitComponent { QubitId = QubitCount });
+        QubitCount++;
+        return qubit;
     }
 
     private EntityArchetype CreateQubitArchetype(EntityManager entityManager)
@@ -78,6 +139,7 @@ public class QubitGenerator : MonoBehaviour
            typeof(Translation),
            typeof(Rotation),
            typeof(Energy),
-           typeof(QuantumState));
+           typeof(QuantumState),
+           typeof(QubitComponent));
     }
 }

@@ -13,13 +13,13 @@ public class RotateSystem : JobComponentSystem
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         float deltaTime = Time.DeltaTime;
-        float ROTATION_SPEED = 0.5f; // deg/s
+        float ROTATION_SPEED = 0.5f; // rad/s
 
         Entities.ForEach((ref Rotation rotation, ref QuantumState quantumState, ref Energy energy) =>
         {
             //TODO: Verify how state should be changing on rotation along X Z
             //normalize returns NaN, using normalizesafe instead
-            rotation.Value = math.mul(math.normalizesafe(rotation.Value), quaternion.RotateX(ROTATION_SPEED * deltaTime));
+            //rotation.Value = math.mul(math.normalizesafe(rotation.Value), quaternion.RotateY(ROTATION_SPEED * deltaTime));
         }).Run();
 
         return default;
