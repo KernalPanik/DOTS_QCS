@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 1415745801}
   - component: {fileID: 1415745800}
   m_Layer: 0
-  m_Name: QubitGenerator
+  m_Name: QuantumComputer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
