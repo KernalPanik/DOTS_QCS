@@ -4,10 +4,15 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
+/// <summary>
+/// Gate codes that map given code to the gate it represents
+/// It is used in Gates.ApplyGate() method
+/// </summary>
 public enum GateCodes
 {
     IDENTITY = 0,
-    X = 1
+    X = 1,
+    HADAMARD = 2
 }
 
 public static class Gates
@@ -24,6 +29,9 @@ public static class Gates
                 break;
             case (int)GateCodes.X:
                 ApplyX(ref qubitRotation);
+                break;
+            case (int)GateCodes.HADAMARD:
+                ApplyHadamard(ref qubitRotation);
                 break;
         }
     }
@@ -42,5 +50,14 @@ public static class Gates
     public static void ApplyX(ref Rotation qubitRotation)
     {
         qubitRotation.Value = math.mul(math.normalizesafe(qubitRotation.Value), quaternion.RotateX(math.PI));
+    }
+
+    /// <summary>
+    /// Apply Hadamard gate
+    /// </summary>
+    public static void ApplyHadamard(ref Rotation qubitRotation)
+    {
+        qubitRotation.Value = math.mul(math.normalizesafe(qubitRotation.Value), quaternion.RotateZ(math.PI/2));
+        qubitRotation.Value = math.mul(math.normalizesafe(qubitRotation.Value), quaternion.RotateY(math.PI));
     }
 }

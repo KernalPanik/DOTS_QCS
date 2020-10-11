@@ -73,55 +73,91 @@ public class PhysicalToQuantumSystem : ComponentSystem
 public static class ExtraMath
 {
     /// <summary>
-    /// a function to convert a given quaternion into vector of longitude and lattitude
+    /// A method that converts a given quaternion into spherical coordinates (theta & phi) by 
+    /// calculating a direction vector and translating it's coordinates into theta and phi //TODO: rework doc
     /// </summary>
-    public static SphericalCoords QuaternionToSpherical(quaternion quaternion)
+    public static SphericalCoords QuaternionToSpherical(quaternion quat)
     {
+        float3 v = math.normalize(math.mul(quat, Vector3.up));
         SphericalCoords coords = new SphericalCoords();
-        //TODO: Verify if such conversion is correct
-        coords.Theta = math.atan2(quaternion.value.y, quaternion.value.w);
-        coords.Phi = math.acos(quaternion.value.z / 1); // since we're working with a unit sphere, our radius is equal to 1
+
+        coords.Phi = math.atan(v.x / v.z); // lon
+        coords.Theta = math.acos(v.y / 1); // lat
+
         return coords;
     }
+
+
+    public static float3 ToEulerAngles(quaternion q)
+    {
+        float3 angles;
+
+        // roll (x-axis rotation)
+        double sinr_cosp = 2 * (q.value.w * q.value.x + q.value.y * q.value.z);
+        double cosr_cosp = 1 - 2 * (q.value.x * q.value.x + q.value.y * q.value.y);
+        angles.x = (float)math.atan2(sinr_cosp, cosr_cosp);
+
+        // pitch (y-axis rotation)
+        double sinp = 2 * (q.value.w * q.value.y - q.value.z * q.value.x);
+        if (math.abs(sinp) >= 1)
+            angles.y = (float)CopySign(math.PI / 2, sinp); // use 90 degrees if out of range
+        else
+            angles.y = (float)math.asin(sinp);
+
+        // yaw (z-axis rotation)
+        double siny_cosp = 2 * (q.value.w * q.value.z + q.value.x * q.value.y);
+        double cosy_cosp = 1 - 2 * (q.value.y * q.value.y + q.value.z * q.value.z);
+        angles.z = (float)math.atan2(siny_cosp, cosy_cosp);
+
+        return angles;
+    }
+
+    private static double CopySign(double a, double b)
+    {
+        return math.abs(a) * math.sign(b);
+    }
+
 }
 
 public class QuantumCircuit : ComponentSystem
 {
-    private int executedStep = 0;
+    private int executed = 0;
     protected override void OnUpdate()
     {
         //TODO: Find out how to add OR check to foreach
-
         var em = World.DefaultGameObjectInjectionWorld.EntityManager;
-        EntityCommandBuffer cmd;
-            
-        foreach(var gate in QuantumComputer.gateList)
-        {
-            var gateComponent = em.GetComponentData<GateComponent>(gate);
 
-            // Find qubits which should be modified
-            Entities.ForEach((Entity entity, ref QuantumState quantumState, ref Rotation rotation, ref QubitComponent qubitComponent) => 
-            { 
-                if(gateComponent.QubitId == qubitComponent.QubitId)
+        if (executed == 0)
+        {
+            foreach (var gate in QuantumComputer.gateList)
+            {
+                var gateComponent = em.GetComponentData<GateComponent>(gate);
+
+                // Find qubits which should be modified
+                Entities.ForEach((Entity entity, ref QuantumState quantumState, ref Rotation rotation, ref QubitComponent qubitComponent) =>
                 {
+                    if (gateComponent.QubitId == qubitComponent.QubitId)
+                    {
                     // Add singleQubitGate component to this entity
                     // Pretty sure that ExecutionOrder is not needed in this case
                     em.AddComponentData(entity, new SingleQubitGate { ExecutionOrder = 0, GateCode = gateComponent.GateCode });
-                }
-            });
+                    }
+                });
 
-            // Go through all entities with attached SingleQubitGate components
-            Entities.ForEach((Entity entity, ref QuantumState quantumState, ref Rotation rotation,
-                ref QubitComponent qubitComponent, ref SingleQubitGate singleQubitGate) =>
-            {
-                Gates.ApplyGate(singleQubitGate.GateCode, ref rotation);
-            });
+                // Go through all entities with attached SingleQubitGate components
+                Entities.ForEach((Entity entity, ref QuantumState quantumState, ref Rotation rotation,
+                    ref QubitComponent qubitComponent, ref SingleQubitGate singleQubitGate) =>
+                {
+                    Gates.ApplyGate(singleQubitGate.GateCode, ref rotation);
+                });
 
-            // Remove all Attached single qubit gate components 
-            Entities.ForEach((Entity entity) =>
-            {
+                // Remove all Attached single qubit gate components 
+                Entities.ForEach((Entity entity) =>
+                {
                 //em.RemoveComponent<SingleQubitGate>(entity);
-            });
+                });
+            }
+            //executed = 1;
         }
     }
 }
@@ -141,20 +177,19 @@ public class QuantumComputer : MonoBehaviour
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
         //maybe encapsulate the dictionary?
         qubitDictionary.Add(QubitCount, CreateQubit(entityManager));
-        qubitDictionary.Add(QubitCount, CreateQubit(entityManager));
-        qubitDictionary.Add(QubitCount, CreateQubit(entityManager));
-        qubitDictionary.Add(QubitCount, CreateQubit(entityManager));
-        qubitDictionary.Add(QubitCount, CreateQubit(entityManager));
-        qubitDictionary.Add(QubitCount, CreateQubit(entityManager));
+
+        //gateList.Add(CreateGate(entityManager, 0, 0));
+        gateList.Add(CreateGate(entityManager, 2, 0));
+
+        /*gateList.Add(CreateGate(entityManager, 0, 0));
+        gateList.Add(CreateGate(entityManager, 0, 2));*/
+        //gateList.Add(CreateGate(entityManager, 2, 2));
 
         //Apply I gate to the qubit with id 0
-        gateList.Add(CreateGate(entityManager, 0, 0));
-        gateList.Add(CreateGate(entityManager, 1, 1));
-        gateList.Add(CreateGate(entityManager, 0, 2));
-        gateList.Add(CreateGate(entityManager, 1, 3));
-        gateList.Add(CreateGate(entityManager, 0, 4));
-        gateList.Add(CreateGate(entityManager, 1, 5));
-        gateList.Add(CreateGate(entityManager, 1, 5));
+        /*gateList.Add(CreateGate(entityManager, 2, 0));
+        //gateList.Add(CreateGate(entityManager, 1, 0));
+        gateList.Add(CreateGate(entityManager, 0, 0));*/
+        //gateList.Add(CreateGate(entityManager, 1, 0));
     }
 
     public Entity CreateQubit(EntityManager entityManager)

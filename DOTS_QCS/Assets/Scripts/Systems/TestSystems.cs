@@ -19,7 +19,9 @@ public class RotateSystem : JobComponentSystem
         {
             //TODO: Verify how state should be changing on rotation along X Z
             //normalize returns NaN, using normalizesafe instead
-            //rotation.Value = math.mul(math.normalizesafe(rotation.Value), quaternion.RotateY(ROTATION_SPEED * deltaTime));
+            /*rotation.Value = math.mul(math.normalizesafe(rotation.Value), quaternion.RotateY(ROTATION_SPEED * deltaTime));
+            rotation.Value = math.mul(math.normalizesafe(rotation.Value), quaternion.RotateX(ROTATION_SPEED * deltaTime));
+            rotation.Value = math.mul(math.normalizesafe(rotation.Value), quaternion.RotateZ(ROTATION_SPEED * deltaTime));*/
         }).Run();
 
         return default;
