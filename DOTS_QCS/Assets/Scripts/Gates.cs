@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -10,15 +11,16 @@ using UnityEngine;
 /// </summary>
 public enum GateCodes
 {
-    IDENTITY = 0,
-    X = 1,
-    HADAMARD = 2
+    IDENTITY = 1,
+    X = 2,
+    HADAMARD = 3,
+    CNOT = 4
 }
 
 public static class Gates
 {
     /// <summary>
-    /// Apply gate by passing it's code
+    /// Apply double qubit gate by passing it's code and qubit rotation
     /// </summary>
     public static void ApplyGate(int gateCode, ref Rotation qubitRotation)
     {
@@ -33,6 +35,22 @@ public static class Gates
             case (int)GateCodes.HADAMARD:
                 ApplyHadamard(ref qubitRotation);
                 break;
+        }
+    }
+
+    /// <summary>
+    /// Apply double qubit gate by passing it's code and qubit entities
+    /// </summary>
+    public static void ApplyGate(EntityManager em, int gateCode, ref Entity controlQubit,
+        ref Entity targetQubit)
+    {
+        switch(gateCode)
+        {
+            case (int)GateCodes.CNOT:
+                var control = em.GetComponentData<Rotation>(controlQubit);
+                var target = em.GetComponentData<Rotation>(targetQubit);
+                ApplyCNOT(ref control, ref target);
+            break;
         }
     }
 
@@ -59,5 +77,10 @@ public static class Gates
     {
         qubitRotation.Value = math.mul(math.normalizesafe(qubitRotation.Value), quaternion.RotateZ(math.PI/2));
         qubitRotation.Value = math.mul(math.normalizesafe(qubitRotation.Value), quaternion.RotateY(math.PI));
+    }
+
+    public static void ApplyCNOT(ref Rotation control, ref Rotation target)
+    {
+        throw new System.NotImplementedException();
     }
 }
