@@ -21,5 +21,14 @@ namespace Tests
 
             Assert.AreEqual(expectedResult, result);
         }
+
+        [Test]
+        public void RandomNumTest()
+        {
+            float[] stateAmps = { 0.5916079783099616f, 0.806225774829855f };
+            int[] states = { 0b1001, 0b1111 };
+
+            float val = ExtraMath.PickValueFromAmplitudes(stateAmps, states);
+        }
     }
 }

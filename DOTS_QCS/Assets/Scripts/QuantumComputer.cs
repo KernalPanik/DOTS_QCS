@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -138,6 +139,67 @@ namespace QCS
             float4 result = new float4(r1.x, r1.y, r2.x, r2.y);
             return result;
         }
+
+        public static float GenerateStates(int qubitCount)
+        {
+            return math.pow(2, qubitCount);
+        }
+
+        //Isn't it a measurement?
+        public static float PickValueFromAmplitudes(float[] stateAmplitudes, int[] states)
+        {
+            // Find non zero states
+            Dictionary<int, float> nonZeroStatePairs = new Dictionary<int, float>();
+            for(int i = 0; i < states.Length; i++)
+            {
+                if(stateAmplitudes[i] != 0f)
+                {
+                    nonZeroStatePairs.Add(states[i], math.abs(math.pow(stateAmplitudes[i], 2)));
+                }
+            }
+
+            // Order non zero states by amplitudes
+            float largestState = 0f;
+            List<KeyValuePair<int, float>> stateAmpPairs = nonZeroStatePairs.ToList();
+            stateAmpPairs.Sort(
+                delegate(KeyValuePair<int, float> p1, 
+                KeyValuePair<int, float> p2)
+                {
+                    int order = p1.Value.CompareTo(p2.Value);
+                    if (order > 0)
+                        largestState = p1.Value;
+                    else
+                        largestState = p2.Value;
+                    return order;
+                });
+
+            // Generate random number between 0, 99
+            System.Random rand = new System.Random();
+            var randomNum = (rand.NextDouble() * 99f) / 100f;
+
+            // Pick a state based on random number
+            int pickedState = 0;
+            float tempAmp = 0f;
+            foreach(var stateAmpPair in stateAmpPairs)
+            {
+                if (tempAmp < randomNum && randomNum < stateAmpPair.Value)
+                {
+                    pickedState = stateAmpPair.Key;
+                    break;
+                }
+                else if (randomNum > largestState)
+                {
+                    pickedState = stateAmpPair.Key;
+                    break;
+                }
+                else
+                {
+                    tempAmp = stateAmpPair.Value;
+                }
+            }
+
+            return pickedState;
+        }
     }
 
     public class QuantumCircuitSystem : ComponentSystem
@@ -206,8 +268,8 @@ namespace QCS
             {
                 if (gate.Qubit == qubitComponent.Id)
                 {
-                // Add singleQubitGate component to this entity
-                em.AddComponentData(entity, new QuantumGate { GateCode = gate.GateCode });
+                    // Add singleQubitGate component to this entity
+                    em.AddComponentData(entity, new QuantumGate { GateCode = gate.GateCode });
                 }
             });
 
