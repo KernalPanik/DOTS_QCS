@@ -17,7 +17,9 @@ public enum GateCodes
     X = 1,
     HADAMARD = 2,
     CNOT = 3,
-    MEASUREMENT = 4 // Measurement is not a 'gate', but it is convenient to interpret it as it is a gate
+    MEASUREMENT = 4, // Measurement is not a 'gate', but it is convenient to interpret it as it is a gate
+    TOFFOLI = 5,
+    T = 6
 }
 
 public static class Gates
@@ -70,6 +72,16 @@ public static class Gates
                 ApplyCNOT(in controlState, ref targetRotation);
                 em.SetComponentData(targetQubit, targetRotation);
             break;
+        }
+    }
+
+    public static void ApplyGate(EntityManager em, int gateCode, ref Entity c1Qubit, ref Entity c2Qubit, ref Entity targetQubit)
+    {
+        switch (gateCode)
+        { 
+            case (int)GateCodes.TOFFOLI:
+                ApplyToffoli(ref targetQubit, ref c1Qubit, ref c2Qubit);
+                break;
         }
     }
 
@@ -132,5 +144,10 @@ public static class Gates
         qubitState.Beta = 0f;
 
         return (int)measuredState.y;
+    }
+
+    public static void ApplyToffoli(ref Entity target, ref Entity c1, ref Entity c2)
+    {
+        throw new NotImplementedException();
     }
 }

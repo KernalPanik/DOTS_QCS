@@ -5,6 +5,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
+using System.Numerics;
 
 namespace QCS
 {
@@ -45,6 +46,14 @@ namespace QCS
         public int TargetQubit;
     }
 
+    public struct TripleQubitGate : IComponentData
+    {
+        public int GateCode;
+        public int C1Qubit;
+        public int C2Qubit;
+        public int TargetQubit;
+    }
+
     public struct QubitComponent : IComponentData
     {
         public int Id;
@@ -71,6 +80,7 @@ namespace QCS
         public int Zeta;
     }
 
+    [Obsolete]
     public class PhysicalToQuantumSystem : ComponentSystem
     {
         /// <summary>
@@ -95,7 +105,7 @@ namespace QCS
         /// </summary>
         public static SphericalCoords QuaternionToSpherical(quaternion quat)
         {
-            float3 v = math.normalize(math.mul(quat, Vector3.up));
+            float3 v = math.normalize(math.mul(quat, UnityEngine.Vector3.up));
             SphericalCoords coords = new SphericalCoords();
 
             coords.Phi = math.atan(v.x / v.z); // lon
@@ -223,6 +233,10 @@ namespace QCS
                     {
                         ExecuteDoubleQubitGate(em, em.GetComponentData<DoubleQubitGate>(gate));
                     }
+                    else if(em.HasComponent<TripleQubitGate>(gate))
+                    {
+                        ExecuteTripleQubitGate(em, em.GetComponentData<TripleQubitGate>(gate));
+                    }
 
                     // Physical rotation quaternion to quantum state mapping
                     Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
@@ -241,28 +255,18 @@ namespace QCS
             Entity controlQubit = new Entity();
             Entity targetQubit = new Entity();
 
-            //Find Control qubit
             Entities.ForEach((Entity entity, ref QuantumState quantumState, ref Rotation rotation, ref QubitComponent qubitComponent) =>
             {
                 if (gate.ControlQubit == qubitComponent.Id)
                 {
-                    // Add singleQubitGate component to this entity
-                    //em.AddComponentData(entity, new QuantumGate { GateCode = gate.GateCode });
                     controlQubit = entity;
                 }
-            });
-
-            //Find Target qubit
-            Entities.ForEach((Entity entity, ref QuantumState quantumState, ref Rotation rotation, ref QubitComponent qubitComponent) =>
-            {
-                if (gate.TargetQubit == qubitComponent.Id)
+                else if (gate.TargetQubit == qubitComponent.Id)
                 {
-                    // Add singleQubitGate component to this entity
-                    //em.AddComponentData(entity, new QuantumGate { GateCode = gate.GateCode });
                     targetQubit = entity;
                 }
             });
-
+           
             //Apply gate
             Gates.ApplyGate(em, gate.GateCode, in controlQubit, ref targetQubit);
         }
@@ -278,23 +282,32 @@ namespace QCS
                     Gates.ApplyGate(em, gate.GateCode, ref entity);
                 }
             });
+        }
 
-            // Go through all entities with attached SingleQubitGate components
-            /*Entities.ForEach((Entity entity, ref QuantumState quantumState, ref Rotation rotation,
-                ref QubitComponent qubitComponent, ref QuantumGate singleQubitGate) =>
+        private void ExecuteTripleQubitGate(EntityManager em, TripleQubitGate gate)
+        {
+            Entity c1Qubit = new Entity();
+            Entity c2Qubit = new Entity();
+            Entity targetQubit = new Entity();
+
+            Entities.ForEach((Entity entity, ref QuantumState quantumState, ref Rotation rotation, ref QubitComponent qubitComponent) =>
             {
-
-
-                int x = Gates.ApplyGate(em, gate.GateCode, ref entity);
-
-                if(x != -1)
+                if (gate.C1Qubit == qubitComponent.Id)
                 {
-
+                    c1Qubit = entity;
                 }
+                else if(gate.C2Qubit == qubitComponent.Id)
+                {
+                    c2Qubit = entity;
+                }
+                else if(gate.TargetQubit == qubitComponent.Id)
+                {
+                    targetQubit = entity;
+                }
+            });
 
-                // Set quantum gate to identity after previous gate was applied
-                em.AddComponentData(entity, new QuantumGate { GateCode = (int)GateCodes.IDENTITY });
-            });*/
+            //Apply gate
+            Gates.ApplyGate(em, gate.GateCode, ref c1Qubit, ref c2Qubit, ref targetQubit);
         }
     }
 
@@ -355,6 +368,13 @@ namespace QCS
         {
             var gate = CreateGate(entityManager);
             entityManager.AddComponentData(gate, new DoubleQubitGate { GateCode = gateCode, ControlQubit = controlQubit, TargetQubit = targetQubit });
+            return gate;
+        }
+
+        public Entity CreateGate(EntityManager entityManager, int gateCode, int c1Qubit, int c2Qubit, int targetQubit)
+        {
+            var gate = CreateGate(entityManager);
+            entityManager.AddComponentData(gate, new TripleQubitGate { GateCode = gateCode, C1Qubit = c1Qubit, C2Qubit = c2Qubit, TargetQubit = targetQubit });
             return gate;
         }
 
