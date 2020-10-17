@@ -19,7 +19,8 @@ public enum GateCodes
     CNOT = 3,
     MEASUREMENT = 4, // Measurement is not a 'gate', but it is convenient to interpret it as it is a gate
     TOFFOLI = 5,
-    T = 6
+    T = 6,
+    T_ = 7
 }
 
 public static class Gates
@@ -51,6 +52,8 @@ public static class Gates
             case (int)GateCodes.MEASUREMENT:
                 classicalData = ApplyMeasurement(ref qubitRotation, ref qubitQuantumState);
                 break;
+            default:
+                throw new KeyNotFoundException("Gate code is not found");
         }
 
         em.SetComponentData(Qubit, qubitRotation);
@@ -72,16 +75,27 @@ public static class Gates
                 ApplyCNOT(in controlState, ref targetRotation);
                 em.SetComponentData(targetQubit, targetRotation);
             break;
+            default:
+                throw new KeyNotFoundException("Gate code is not found");
         }
     }
 
-    public static void ApplyGate(EntityManager em, int gateCode, ref Entity c1Qubit, ref Entity c2Qubit, ref Entity targetQubit)
+    /// <summary>
+    /// Apply triple qubit gate by passing it's code and qubit entities
+    /// </summary>
+    public static void ApplyGate(EntityManager em, int gateCode, in Entity c1Qubit, in Entity c2Qubit, ref Entity targetQubit)
     {
         switch (gateCode)
         { 
             case (int)GateCodes.TOFFOLI:
-                ApplyToffoli(ref targetQubit, ref c1Qubit, ref c2Qubit);
+                var c1State = em.GetComponentData<QuantumState>(c1Qubit);
+                var c2State = em.GetComponentData<QuantumState>(c2Qubit);
+                var targetRotation = em.GetComponentData<Rotation>(targetQubit);
+                ApplyToffoli(ref targetRotation, in c1State, in c2State);
+                em.SetComponentData(targetQubit, targetRotation);
                 break;
+            default:
+                throw new KeyNotFoundException("Gate code is not found");
         }
     }
 
@@ -146,8 +160,24 @@ public static class Gates
         return (int)measuredState.y;
     }
 
-    public static void ApplyToffoli(ref Entity target, ref Entity c1, ref Entity c2)
+    /// <summary>
+    /// Apply Toffoli gate
+    /// This gate requires to know the state of two control qubits, so passing only them and a
+    /// rotation of the target qubit
+    /// </summary>
+    public static void ApplyToffoli(ref Rotation target, in QuantumState c1, in QuantumState c2)
     {
-        throw new NotImplementedException();
+        float[] c1_stateAmps = new float[] { c1.Alpha, c1.Beta };
+        int[] c1_states = new int[] { 0, 1 };
+        float[] c2_stateAmps = new float[] { c2.Alpha, c2.Beta };
+        int[] c2_states = new int[] { 0, 1 };
+
+        float2 c1_stateFromAmps = ExtraMath.PickValueFromAmplitudes(c1_stateAmps, c1_states);
+        float2 c2_stateFromAmps = ExtraMath.PickValueFromAmplitudes(c2_stateAmps, c2_states);
+
+        if(c1_stateFromAmps.y == 1f && c2_stateFromAmps.y == 1f)
+        {
+            ApplyX(ref target);
+        }
     }
 }

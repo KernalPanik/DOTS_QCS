@@ -307,7 +307,7 @@ namespace QCS
             });
 
             //Apply gate
-            Gates.ApplyGate(em, gate.GateCode, ref c1Qubit, ref c2Qubit, ref targetQubit);
+            Gates.ApplyGate(em, gate.GateCode, in c1Qubit, in c2Qubit, ref targetQubit);
         }
     }
 
@@ -329,10 +329,8 @@ namespace QCS
             qubitList.Add(CreateQubit(entityManager));
 
             gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 0));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 1));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 2));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 1));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 0));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 1));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 0, 1, 2));
 
             //gateList.Add(CreateGate(entityManager, 1, 1));
         }
