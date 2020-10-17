@@ -279,7 +279,11 @@ namespace QCS
                 {
                     // Add singleQubitGate component to this entity
                     //em.AddComponentData(entity, new QuantumGate { GateCode = gate.GateCode });
-                    Gates.ApplyGate(em, gate.GateCode, ref entity);
+                    int gateResult = Gates.ApplyGate(em, gate.GateCode, ref entity);
+                    if(gateResult != -1)
+                    {
+                        Debug.Log(string.Format("Measurement on qubit {0} returned {1}", qubitComponent.Id, gateResult));
+                    }
                 }
             });
         }
@@ -327,10 +331,19 @@ namespace QCS
             qubitList.Add(CreateQubit(entityManager));
             qubitList.Add(CreateQubit(entityManager));
             qubitList.Add(CreateQubit(entityManager));
+            qubitList.Add(CreateQubit(entityManager));
+            qubitList.Add(CreateQubit(entityManager));
 
             gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 0));
             gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 1));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 0, 1, 2));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 3));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 1, 3));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 2, 3));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 0, 1, 4));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 0, 2, 4));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.MEASUREMENT, 3));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 1, 2, 4));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.MEASUREMENT, 4));
 
             //gateList.Add(CreateGate(entityManager, 1, 1));
         }
