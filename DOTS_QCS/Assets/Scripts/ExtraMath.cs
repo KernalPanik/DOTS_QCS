@@ -29,7 +29,6 @@ namespace QCS
             return coords;
         }
 
-
         public static float3 ToEulerAngles(quaternion q)
         {
             float3 angles;

@@ -20,7 +20,8 @@ public enum GateCodes
     MEASUREMENT = 4, // Measurement is not a 'gate', but it is convenient to interpret it as it is a gate
     TOFFOLI = 5,
     T = 6,
-    T_ = 7
+    T_ = 7,
+    RY = 8
 }
 
 public static class Gates
@@ -55,6 +56,7 @@ public static class Gates
             default:
                 throw new KeyNotFoundException("Gate code is not found");
         }
+        
 
         em.SetComponentData(Qubit, qubitRotation);
         em.SetComponentData(Qubit, qubitQuantumState);
@@ -75,6 +77,20 @@ public static class Gates
                 ApplyCNOT(in controlState, ref targetRotation);
                 em.SetComponentData(targetQubit, targetRotation);
             break;
+            default:
+                throw new KeyNotFoundException("Gate code is not found");
+        }
+    }
+
+    public static void ApplyGate(EntityManager em, int gateCode, in Entity qubit, float value)
+    {
+        Rotation qubitRotation = em.GetComponentData<Rotation>(qubit);
+
+        switch (gateCode)
+        {
+            case (int)GateCodes.RY:
+                ApplyRyGate(ref qubitRotation, value);
+                break;
             default:
                 throw new KeyNotFoundException("Gate code is not found");
         }
@@ -179,5 +195,10 @@ public static class Gates
         {
             ApplyX(ref target);
         }
+    }
+
+    public static void ApplyRyGate(ref Rotation target, float angle)
+    {
+        target.Value = math.mul(math.normalizesafe(target.Value), quaternion.RotateY(angle));
     }
 }
