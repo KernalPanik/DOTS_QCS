@@ -15,7 +15,7 @@ namespace QCS
         {
             var em = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-            if (executed < 1)
+            if (executed < 1500)
             {
                 foreach (var gate in QuantumComputer.gateList)
                 {

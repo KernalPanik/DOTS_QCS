@@ -201,4 +201,14 @@ public static class Gates
     {
         target.Value = math.mul(math.normalizesafe(target.Value), quaternion.RotateY(angle));
     }
+
+    public static void ApplyRxGate(ref Rotation target, float angle)
+    {
+        target.Value = math.mul(math.normalizesafe(target.Value), quaternion.RotateX(angle));
+    }
+
+    public static void ApplyRzGate(ref Rotation target, float angle)
+    {
+        target.Value = math.mul(math.normalizesafe(target.Value), quaternion.RotateZ(angle));
+    }
 }
