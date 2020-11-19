@@ -11,12 +11,11 @@ namespace QCS
     public class QuantumCircuitSystem : ComponentSystem
     {
         private int executed = 0;
-
         protected override void OnUpdate()
         {
             var em = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-            if (executed == 0)
+            if (executed < 1500)
             {
                 foreach (var gate in QuantumComputer.gateList)
                 {
@@ -41,7 +40,7 @@ namespace QCS
                         quantumState.Beta = math.sqrt(1 - math.pow(quantumState.Alpha, 2));
                     });
                 }
-                executed = 1;
+                executed += 1;
             }
         }
 
@@ -72,9 +71,9 @@ namespace QCS
             {
                 if (gate.Qubit == qubitComponent.Id)
                 {
-                // Add singleQubitGate component to this entity
-                //em.AddComponentData(entity, new QuantumGate { GateCode = gate.GateCode });
-                int gateResult = Gates.ApplyGate(em, gate.GateCode, ref entity);
+                    // Add singleQubitGate component to this entity
+                    //em.AddComponentData(entity, new QuantumGate { GateCode = gate.GateCode });
+                    int gateResult = Gates.ApplyGate(em, gate.GateCode, ref entity);
                     if (gateResult != -1)
                     {
                         Debug.Log(string.Format("Measurement on qubit {0} returned {1}", qubitComponent.Id, gateResult));

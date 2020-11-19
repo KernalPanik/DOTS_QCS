@@ -30,7 +30,7 @@ namespace QCS
 
             gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 0));
             gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 1));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 2));
+            //gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 2));
             gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 3));
             gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 1, 3));
             gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 2, 3));
