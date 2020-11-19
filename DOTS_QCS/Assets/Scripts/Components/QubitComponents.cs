@@ -20,6 +20,9 @@ namespace QCS
         /// </summary>
         public float Alpha;
         public float Beta;
+
+        // If 'Locked' is set to 1, it means that qubit was measured, and it's state should be saved
+        public byte Locked; 
     }
 
     public struct QubitComponent : IComponentData
