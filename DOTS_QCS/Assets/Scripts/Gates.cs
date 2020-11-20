@@ -167,16 +167,12 @@ public static class Gates
     public static int ApplyMeasurement(ref Rotation qubitRotation, ref QuantumState qubitState)
     {
         // Qubit state should be modified and fixed here, since we already measured it
-
         float[] stateAmps = new float[] { qubitState.Alpha, qubitState.Beta };
         int[] states = new int[] { 0, 1 };
         float2 measuredState = ExtraMath.PickValueFromAmplitudes(stateAmps, states);
         qubitRotation.Value = quaternion.identity;
 
-        qubitState.Alpha = 0f;
-        qubitState.Beta = 0f;
-
-        /*if (measuredState.y == 1)
+        if (measuredState.y == 1)
         {
             qubitState.Alpha = 0;
             qubitState.Beta = 1;
@@ -185,12 +181,10 @@ public static class Gates
         {
             qubitState.Beta = 0;
             qubitState.Alpha = 1;
-        }*/
-
-        qubitState.Alpha = measuredState.x;
-
-        //qubitState.Locked = 1;
-
+        }
+        //qubitState.Alpha = measuredState.x;
+        qubitState.Locked = 1;
+        
         return (int)measuredState.y;
     }
 

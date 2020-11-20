@@ -36,7 +36,7 @@ namespace QCS
                     // Physical rotation quaternion to quantum state mapping
                     Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
                     {
-                        if (true)
+                        if (quantumState.Locked == 0)
                         {
                             var coords = ExtraMath.QuaternionToSpherical(rotation.Value);
                             quantumState.Alpha = math.cos(coords.Theta / 2);
@@ -46,12 +46,13 @@ namespace QCS
                 }
 
                 var statevector = GenerateStateVector();
-                //Debug.Log($"statevector: {string.Join("", statevector.ToList().ConvertAll(i => i.ToString()).ToArray())}");
+                Debug.Log($"statevector: {string.Join("", statevector.ToList().ConvertAll(i => i.ToString()).ToArray())}");
                 executed += 1;
                 
-                // Unlock all states
-                Entities.ForEach((Entity entity, ref QuantumState quantumState) => {
-                    quantumState.Locked = 0;
+                // Reset all states
+                Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) => {
+                    rotation = default;
+                    quantumState = default;
                 });
             }
         }
@@ -117,11 +118,13 @@ namespace QCS
                 {
                     // Add singleQubitGate component to this entity
                     //em.AddComponentData(entity, new QuantumGate { GateCode = gate.GateCode });
+
+                    var str = $"qubit 4 alpha {quantumState.Alpha} beta {quantumState.Beta}";
                     int gateResult = Gates.ApplyGate(em, gate.GateCode, ref entity);
-                    if (gateResult != -1)
+                    /*if (gateResult != -1 && qubitComponent.Id == 4)
                     {
-                        Debug.Log(string.Format("Measurement on qubit {0} returned {1}", qubitComponent.Id, gateResult));
-                    }
+                        Debug.Log(string.Format("{0} Measurement on qubit {1} returned {2}", str, qubitComponent.Id, gateResult));
+                    }*/
                 }
             });
         }
