@@ -21,7 +21,7 @@ public class QuantumNoiseSystem : ComponentSystem
             // randControl can be 0 ir 1 to reflect control state. If it is 1, then we apply rotation in this frame
             var randAxis = Random.Range(0, 2);
             // generating random angle for simplicity for now.
-            var randAngle = Random.Range(15, 45);
+            var randAngle = Random.Range(0, 90);
 
             switch (randAxis)
             {
@@ -36,5 +36,6 @@ public class QuantumNoiseSystem : ComponentSystem
                     break;
             }
         });
+
     }
 }
