@@ -12,6 +12,8 @@ namespace QCS
     public class QuantumCircuitSystem : ComponentSystem
     {
         private int executed = 0;
+        
+        public static List<int[]> StatevectorList = new List<int[]>();
         protected override void OnUpdate()
         {
             var em = World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -47,6 +49,7 @@ namespace QCS
 
                 var statevector = GenerateStateVector();
                 Debug.Log($"statevector: {string.Join("", statevector.ToList().ConvertAll(i => i.ToString()).ToArray())}");
+                StatevectorList.Add(statevector);
                 executed += 1;
                 
                 // Reset all states
@@ -116,15 +119,7 @@ namespace QCS
             {
                 if (gate.Qubit == qubitComponent.Id)
                 {
-                    // Add singleQubitGate component to this entity
-                    //em.AddComponentData(entity, new QuantumGate { GateCode = gate.GateCode });
-
-                    var str = $"qubit 4 alpha {quantumState.Alpha} beta {quantumState.Beta}";
                     int gateResult = Gates.ApplyGate(em, gate.GateCode, ref entity);
-                    /*if (gateResult != -1 && qubitComponent.Id == 4)
-                    {
-                        Debug.Log(string.Format("{0} Measurement on qubit {1} returned {2}", str, qubitComponent.Id, gateResult));
-                    }*/
                 }
             });
         }
