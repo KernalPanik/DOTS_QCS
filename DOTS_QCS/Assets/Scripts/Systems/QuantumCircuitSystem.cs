@@ -12,50 +12,85 @@ namespace QCS
     public class QuantumCircuitSystem : ComponentSystem
     {
         private int executed = 0;
-        
+        private bool benchmarkFound = false;
+
         public static List<int[]> StatevectorList = new List<int[]>();
+        public static bool CircuitWorking = true;
+        public static int[] benchmarkStatevector;
+
         protected override void OnUpdate()
         {
-            var em = World.DefaultGameObjectInjectionWorld.EntityManager;
-
-            if (executed < 5000)
+            if (!benchmarkFound)
             {
-                foreach (var gate in QuantumComputer.gateList)
-                {
-                    if (em.HasComponent<SingleQubitGate>(gate))
-                    {
-                        ExecuteSingleQubitGate(em, em.GetComponentData<SingleQubitGate>(gate));
-                    }
-                    else if (em.HasComponent<DoubleQubitGate>(gate))
-                    {
-                        ExecuteDoubleQubitGate(em, em.GetComponentData<DoubleQubitGate>(gate));
-                    }
-                    else if (em.HasComponent<TripleQubitGate>(gate))
-                    {
-                        ExecuteTripleQubitGate(em, em.GetComponentData<TripleQubitGate>(gate));
-                    }
+                // Noise is now disabled, get benchmark statevector
+                IterateOverGates();
+                benchmarkStatevector = GenerateStateVector();
+                Debug.Log($"benchmark statevector: {string.Join("", benchmarkStatevector.ToList().ConvertAll(i => i.ToString()).ToArray())}");
+                benchmarkFound = true;
+                EnableNoise();
+            }
 
-                    // Physical rotation quaternion to quantum state mapping
-                    Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
-                    {
-                        if (quantumState.Locked == 0)
-                        {
-                            var coords = ExtraMath.QuaternionToSpherical(rotation.Value);
-                            quantumState.Alpha = math.cos(coords.Theta / 2);
-                            quantumState.Beta = math.sqrt(1 - math.pow(quantumState.Alpha, 2));
-                        }
-                    });
-                }
+            if (executed < 100)
+            {
+                IterateOverGates();
 
                 var statevector = GenerateStateVector();
                 Debug.Log($"statevector: {string.Join("", statevector.ToList().ConvertAll(i => i.ToString()).ToArray())}");
                 StatevectorList.Add(statevector);
                 executed += 1;
-                
+
                 // Reset all states
-                Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) => {
+                Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
+                {
                     rotation = default;
                     quantumState = default;
+                });
+            }
+
+            if (executed == 100 && CircuitWorking)
+            {
+                CircuitWorking = false;
+                Debug.Log("Quantum computer simulation is finished, use QCS menu for more tasks");
+            }
+        }
+
+        private void EnableNoise()
+        {
+            var em = World.DefaultGameObjectInjectionWorld.EntityManager;
+            Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
+            {
+                em.AddComponentData(entity, new NoiseComponent { });
+            });
+        }
+
+        private void IterateOverGates()
+        {
+            var em = World.DefaultGameObjectInjectionWorld.EntityManager;
+
+            foreach (var gate in QuantumComputer.gateList)
+            {
+                if (em.HasComponent<SingleQubitGate>(gate))
+                {
+                    ExecuteSingleQubitGate(em, em.GetComponentData<SingleQubitGate>(gate));
+                }
+                else if (em.HasComponent<DoubleQubitGate>(gate))
+                {
+                    ExecuteDoubleQubitGate(em, em.GetComponentData<DoubleQubitGate>(gate));
+                }
+                else if (em.HasComponent<TripleQubitGate>(gate))
+                {
+                    ExecuteTripleQubitGate(em, em.GetComponentData<TripleQubitGate>(gate));
+                }
+
+                // Physical rotation quaternion to quantum state mapping
+                Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
+                {
+                    if (quantumState.Locked == 0)
+                    {
+                        var coords = ExtraMath.QuaternionToSpherical(rotation.Value);
+                        quantumState.Alpha = math.cos(coords.Theta / 2);
+                        quantumState.Beta = math.sqrt(1 - math.pow(quantumState.Alpha, 2));
+                    }
                 });
             }
         }
@@ -68,8 +103,9 @@ namespace QCS
         {
             var statevector = new int[QuantumComputer.qubitList.Count];
             var currentQubit = 0;
-            Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) => { 
-                if(quantumState.Locked == 0)
+            Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
+            {
+                if (quantumState.Locked == 0)
                 {
                     statevector[currentQubit] = (byte)ExtraMath.PickValueFromAmplitudes(
                         new float[] { quantumState.Alpha, quantumState.Beta },
@@ -78,7 +114,7 @@ namespace QCS
                 else
                 {
                     // We already have a measured state
-                    if(quantumState.Alpha == 1)
+                    if (quantumState.Alpha == 1)
                     {
                         statevector[currentQubit] = 0;
                     }

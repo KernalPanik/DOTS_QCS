@@ -6,6 +6,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 using System.Numerics;
+using UnityEditor;
 
 namespace QCS
 {
@@ -41,6 +42,35 @@ namespace QCS
             gateList.Add(CreateGate(entityManager, (int)GateCodes.MEASUREMENT, 4));
 
             //gateList.Add(CreateGate(entityManager, 1, 1));
+        }
+
+        [MenuItem("QCS/Calculate fidelity")]
+        public static void CalculateFidelity()
+        {
+            List<float> statevectorDistances = new List<float>();
+            List<string> statevectorStrings = new List<string>();
+
+            if (!QuantumCircuitSystem.CircuitWorking)
+            {
+                // Get all statevectors and perform computation analysis
+                var statevectors = QuantumCircuitSystem.StatevectorList;
+
+                foreach (var statevector in statevectors)
+                {
+                    var expandedStatevector = ExtraMath.ExpandStatevector(statevector);
+                    statevectorStrings.Add(string.Join("", statevector.ToList().ConvertAll(i => i.ToString()).ToArray()));
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Quantum computer simulation is still running, can't calculate fidelity.");
+            }
+
+            var groupedStatevectors = statevectorStrings.GroupBy(i => i);
+            foreach(var group in groupedStatevectors)
+            {
+                Debug.Log($"occurrences of {group.Key}: {group.Count()}");
+            }
         }
 
         public Entity CreateQubit(EntityManager entityManager)

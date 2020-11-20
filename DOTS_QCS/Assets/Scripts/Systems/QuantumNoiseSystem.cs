@@ -16,7 +16,7 @@ public class QuantumNoiseSystem : ComponentSystem
     protected override void OnUpdate()
     {
         var em = World.DefaultGameObjectInjectionWorld.EntityManager;
-        Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
+        Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState, ref NoiseComponent noiseComponent) =>
         {
             // randControl can be 0 ir 1 to reflect control state. If it is 1, then we apply rotation in this frame
             var randAxis = Random.Range(0, 2);
@@ -36,6 +36,5 @@ public class QuantumNoiseSystem : ComponentSystem
                     break;
             }
         });
-
     }
 }
