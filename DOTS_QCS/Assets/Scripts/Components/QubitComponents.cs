@@ -33,4 +33,9 @@ namespace QCS
     public struct NoiseComponent : IComponentData
     {
     }
+
+    public struct ErrorCorrectionComponent : IComponentData
+    {
+
+    }
 }

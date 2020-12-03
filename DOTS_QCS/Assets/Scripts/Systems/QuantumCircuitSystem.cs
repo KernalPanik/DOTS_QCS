@@ -16,21 +16,28 @@ namespace QCS
 
         public static List<int[]> StatevectorList = new List<int[]>();
         public static bool CircuitWorking = true;
-        public static int[] benchmarkStatevector;
+        public static int[] BenchhmarkStatevector { get; set; }
 
         protected override void OnUpdate()
         {
             if (!benchmarkFound)
             {
+                // TODO: Fix incorrect benchmar statevector calculation
                 // Noise is now disabled, get benchmark statevector
                 IterateOverGates();
-                benchmarkStatevector = GenerateStateVector();
-                Debug.Log($"benchmark statevector: {string.Join("", benchmarkStatevector.ToList().ConvertAll(i => i.ToString()).ToArray())}");
+                BenchhmarkStatevector = GenerateStateVector();
+                Debug.Log($"benchmark statevector: {string.Join("", BenchhmarkStatevector.ToList().ConvertAll(i => i.ToString()).ToArray())}");
                 benchmarkFound = true;
                 EnableNoise();
+
+                Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
+                {
+                    rotation = default;
+                    quantumState = default;
+                });
             }
 
-            if (executed < 100)
+            if (executed < 10000)
             {
                 IterateOverGates();
 
@@ -47,7 +54,7 @@ namespace QCS
                 });
             }
 
-            if (executed == 100 && CircuitWorking)
+            if (executed == 10000 && CircuitWorking)
             {
                 CircuitWorking = false;
                 Debug.Log("Quantum computer simulation is finished, use QCS menu for more tasks");
@@ -57,11 +64,16 @@ namespace QCS
         private void EnableNoise()
         {
             var em = World.DefaultGameObjectInjectionWorld.EntityManager;
-            Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
+            Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState, ref QubitComponent qubitComponent) =>
             {
-                em.AddComponentData(entity, new NoiseComponent { });
+                if (!em.HasComponent<ErrorCorrectionComponent>(entity))
+                {
+                    em.AddComponentData(entity, new NoiseComponent { });
+                }
             });
         }
+
+
 
         private void IterateOverGates()
         {
@@ -82,12 +94,39 @@ namespace QCS
                     ExecuteTripleQubitGate(em, em.GetComponentData<TripleQubitGate>(gate));
                 }
 
+                if (em.HasComponent<NoisyChannel>(gate))
+                {
+                    Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState, ref NoiseComponent noiseComponent) =>
+                    {
+                        //var randAxis = Random.Range(0, 2);
+                        // generating random angle for simplicity for now.
+                        //var randAngle = Random.Range(0, 90);
+
+                        var randAxis = 0;
+                        var randAngle = 1f;
+
+                        switch (randAxis)
+                        {
+                            case 0:
+                                Gates.ApplyRxGate(ref rotation, randAngle);
+                                break;
+                            case 1:
+                                Gates.ApplyRyGate(ref rotation, randAngle);
+                                break;
+                            case 2:
+                                Gates.ApplyRzGate(ref rotation, randAngle);
+                                break;
+                        }
+                    });
+                }
+
                 // Physical rotation quaternion to quantum state mapping
                 Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
                 {
                     if (quantumState.Locked == 0)
                     {
                         var coords = ExtraMath.QuaternionToSpherical(rotation.Value);
+                        // TODO: (Luke) Check if alpha is for 0 or 1
                         quantumState.Alpha = math.cos(coords.Theta / 2);
                         quantumState.Beta = math.sqrt(1 - math.pow(quantumState.Alpha, 2));
                     }
@@ -101,26 +140,31 @@ namespace QCS
         /// <returns></returns>
         private int[] GenerateStateVector()
         {
-            var statevector = new int[QuantumComputer.qubitList.Count];
+            var em = World.DefaultGameObjectInjectionWorld.EntityManager;
+
+            var statevector = new int[QuantumComputer.LogicalQubitCount];
             var currentQubit = 0;
             Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
             {
-                if (quantumState.Locked == 0)
+                if (!em.HasComponent<ErrorCorrectionComponent>(entity))
                 {
-                    statevector[currentQubit] = (byte)ExtraMath.PickValueFromAmplitudes(
-                        new float[] { quantumState.Alpha, quantumState.Beta },
-                        new int[] { 0, 1 });
-                }
-                else
-                {
-                    // We already have a measured state
-                    if (quantumState.Alpha == 1)
+                    if (quantumState.Locked == 0)
                     {
-                        statevector[currentQubit] = 0;
+                        statevector[currentQubit] = (byte)ExtraMath.PickValueFromAmplitudes(
+                            new float[] { quantumState.Alpha, quantumState.Beta },
+                            new int[] { 0, 1 });
                     }
                     else
                     {
-                        statevector[currentQubit] = 1;
+                        // We already have a measured state
+                        if (quantumState.Alpha == 1)
+                        {
+                            statevector[currentQubit] = 0;
+                        }
+                        else
+                        {
+                            statevector[currentQubit] = 1;
+                        }
                     }
                 }
             });
