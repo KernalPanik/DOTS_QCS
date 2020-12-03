@@ -24,136 +24,12 @@ namespace QCS
         private void Start()
         {
             entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-            //TODO: Create a better interface to compose circuits
-            qubitList.Add(CreateQubit(entityManager));
-            qubitList.Add(CreateQubit(entityManager, true));
-            qubitList.Add(CreateQubit(entityManager, true));
-            qubitList.Add(CreateQubit(entityManager, true));
-            qubitList.Add(CreateQubit(entityManager, true));
-            qubitList.Add(CreateQubit(entityManager, true));
-            qubitList.Add(CreateQubit(entityManager, true));
-            qubitList.Add(CreateQubit(entityManager, true));
-            qubitList.Add(CreateQubit(entityManager, true));
 
-            /*qubitList.Add(CreateQubit(entityManager));
-            qubitList.Add(CreateQubit(entityManager));
-            qubitList.Add(CreateQubit(entityManager));
-            qubitList.Add(CreateQubit(entityManager));*/
-
-            /*gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 0));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 0));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 0));
-            */
-
-            //gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 1));
-            //gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 1));
-
-
-            /*gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 2));
-
-            /*
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 0));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 1));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 2));
-            */
-
-            /*gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 0));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.IDENTITY, 0));
-
-            /*gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 0));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 1));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 2));*/
-
-            /*gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 2));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 2, 1, 0));
-
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.MEASUREMENT, 0));
-            */
-
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 0, noisy:false));
-
-
-
-            // PHASE FLIP CODE
-            /*
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 2, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 0));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 1));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 2));
-            
-
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.IDENTITY, 0));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.IDENTITY, 0));
-
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 0));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 1));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 2));
-            
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 2, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 2, 1, 0, noisy: false));
-            */
-
-
-            //SHOR'S CODE
-            /*gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 3, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 6, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 0, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 3, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 6, noisy: false));
-
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 2, noisy: false));
-
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 3, 4, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 3, 5, noisy: false));
-
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 6, 7, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 6, 8, noisy: false));*/
-
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.IDENTITY, 0));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.IDENTITY, 0));
-
-            /*gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 2, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 2, 1, 0, noisy: false));
-
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 3, 4, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 3, 5, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 5, 4, 3, noisy: false));
-
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 6, 7, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 6, 8, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 8, 7, 6, noisy: false));
-
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 0, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 3, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 6, noisy: false));
-
-
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 3, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 6, noisy: false));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 6, 3, 0, noisy: false));*/
-
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.MEASUREMENT, 0));
-
-            /*
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 0));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 1));
-            //gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 2));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 3));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 1, 3));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 2, 3));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 0, 1, 4));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 0, 2, 4));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.MEASUREMENT, 3));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 1, 2, 4));
-            gateList.Add(CreateGate(entityManager, (int)GateCodes.MEASUREMENT, 4));
-            */
-            //gateList.Add(CreateGate(entityManager, 1, 1));
+            //TestNoise();
+            //TestBitFlip();
+            //TestPhaseFlip();
+            //TestShorsCode();
+            TestFullAdder();
         }
 
         [MenuItem("QCS/Calculate fidelity")]
@@ -272,6 +148,152 @@ namespace QCS
         private EntityArchetype CreateGateArchetype(EntityManager entityManager)
         {
             return entityManager.CreateArchetype();
+        }
+    
+        /// <summary>
+        /// A method that generates a test circuit for a phase flip code
+        /// Initial qubit is set to 1, encoded with phase flip code, and passed through the noise channel
+        /// </summary>
+        private void TestPhaseFlip()
+        {
+            qubitList.Add(CreateQubit(entityManager));
+            qubitList.Add(CreateQubit(entityManager, true));
+            qubitList.Add(CreateQubit(entityManager, true));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 0, noisy: false));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 2, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 0));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 1));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 2));
+
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.IDENTITY, 0));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.IDENTITY, 0));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 0));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 1));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 2));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 2, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 2, 1, 0, noisy: false));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.MEASUREMENT, 0));
+        }
+
+        /// <summary>
+        /// A method that generates a test circuit for a bit flip code
+        /// Initial qubit is set to 1, encoded with bit flip code, and passed through the noise channel
+        /// </summary>
+        private void TestBitFlip()
+        {
+            qubitList.Add(CreateQubit(entityManager));
+            qubitList.Add(CreateQubit(entityManager, true));
+            qubitList.Add(CreateQubit(entityManager, true));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 0, noisy: false));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 2, noisy: false));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.IDENTITY, 0));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.IDENTITY, 0));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 2, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 2, 1, 0, noisy: false));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.MEASUREMENT, 0));
+        }
+
+        /// <summary>
+        /// A method that generates a test circuit for a Shor's code
+        /// Initial qubit is set to 1, encoded with Shor's code, and passed through the noise channel
+        /// </summary>
+        private void TestShorsCode()
+        {
+            qubitList.Add(CreateQubit(entityManager));
+            qubitList.Add(CreateQubit(entityManager, true));
+            qubitList.Add(CreateQubit(entityManager, true));
+            qubitList.Add(CreateQubit(entityManager, true));
+            qubitList.Add(CreateQubit(entityManager, true));
+            qubitList.Add(CreateQubit(entityManager, true));
+            qubitList.Add(CreateQubit(entityManager, true));
+            qubitList.Add(CreateQubit(entityManager, true));
+            qubitList.Add(CreateQubit(entityManager, true));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 3, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 6, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 0, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 3, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 6, noisy: false));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 2, noisy: false));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 3, 4, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 3, 5, noisy: false));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 6, 7, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 6, 8, noisy: false));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.IDENTITY, 0));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.IDENTITY, 0));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 2, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 2, 1, 0, noisy: false));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 3, 4, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 3, 5, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 5, 4, 3, noisy: false));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 6, 7, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 6, 8, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 8, 7, 6, noisy: false));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 0, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 3, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.HADAMARD, 6, noisy: false));
+
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 3, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 6, noisy: false));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 6, 3, 0, noisy: false));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.MEASUREMENT, 0));
+        }
+    
+        private void TestNoise()
+        {
+            qubitList.Add(CreateQubit(entityManager));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.IDENTITY, 0));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.IDENTITY, 0));
+        
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.MEASUREMENT, 0));
+        }
+
+        private void TestFullAdder()
+        {
+            qubitList.Add(CreateQubit(entityManager));
+            qubitList.Add(CreateQubit(entityManager));
+            qubitList.Add(CreateQubit(entityManager));
+            qubitList.Add(CreateQubit(entityManager));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 0));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.X, 1));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 0, 1, 3));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.TOFFOLI, 1, 2, 3));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 1, 2));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.CNOT, 0, 1));
+
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.MEASUREMENT, 2));
+            gateList.Add(CreateGate(entityManager, (int)GateCodes.MEASUREMENT, 3));
         }
     }
 }

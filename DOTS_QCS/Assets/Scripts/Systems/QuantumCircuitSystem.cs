@@ -37,7 +37,7 @@ namespace QCS
                 });
             }
 
-            if (executed < 10000)
+            if (executed < 100)
             {
                 IterateOverGates();
 
@@ -54,7 +54,7 @@ namespace QCS
                 });
             }
 
-            if (executed == 10000 && CircuitWorking)
+            if (executed == 100 && CircuitWorking)
             {
                 CircuitWorking = false;
                 Debug.Log("Quantum computer simulation is finished, use QCS menu for more tasks");
