@@ -36,4 +36,9 @@ namespace QCS
         public int C2Qubit;
         public int TargetQubit;
     }
+
+    public struct NoisyChannel : IComponentData
+    {
+
+    }
 }

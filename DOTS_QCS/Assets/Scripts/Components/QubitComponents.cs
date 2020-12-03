@@ -29,4 +29,13 @@ namespace QCS
     {
         public int Id;
     }
+
+    public struct NoiseComponent : IComponentData
+    {
+    }
+
+    public struct ErrorCorrectionComponent : IComponentData
+    {
+
+    }
 }
