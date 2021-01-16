@@ -41,4 +41,9 @@ namespace QCS
     {
 
     }
+
+    public struct DampingGateComponent : IComponentData
+    {
+
+    }
 }

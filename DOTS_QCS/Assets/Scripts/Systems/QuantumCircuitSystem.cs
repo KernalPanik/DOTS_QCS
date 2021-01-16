@@ -22,13 +22,12 @@ namespace QCS
         {
             if (!benchmarkFound)
             {
-                // TODO: Fix incorrect benchmar statevector calculation
                 // Noise is now disabled, get benchmark statevector
-                IterateOverGates();
+                BenchmarkGatesIteration();
                 BenchhmarkStatevector = GenerateStateVector();
                 Debug.Log($"benchmark statevector: {string.Join("", BenchhmarkStatevector.ToList().ConvertAll(i => i.ToString()).ToArray())}");
                 benchmarkFound = true;
-                EnableNoise();
+                //EnableNoise();
 
                 Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
                 {
@@ -37,7 +36,7 @@ namespace QCS
                 });
             }
 
-            if (executed < 100)
+            if (executed < 1000)
             {
                 IterateOverGates();
 
@@ -54,7 +53,7 @@ namespace QCS
                 });
             }
 
-            if (executed == 100 && CircuitWorking)
+            if (executed == 1000 && CircuitWorking)
             {
                 CircuitWorking = false;
                 Debug.Log("Quantum computer simulation is finished, use QCS menu for more tasks");
@@ -73,7 +72,37 @@ namespace QCS
             });
         }
 
+        private void BenchmarkGatesIteration()
+        {
+            var em = World.DefaultGameObjectInjectionWorld.EntityManager;
 
+            foreach (var gate in QuantumComputer.gateList)
+            {
+                if (em.HasComponent<SingleQubitGate>(gate) && !em.HasComponent<DampingGateComponent>(gate))
+                {
+                    ExecuteSingleQubitGate(em, em.GetComponentData<SingleQubitGate>(gate));
+                }
+                else if (em.HasComponent<DoubleQubitGate>(gate) && !em.HasComponent<DampingGateComponent>(gate))
+                {
+                    ExecuteDoubleQubitGate(em, em.GetComponentData<DoubleQubitGate>(gate));
+                }
+                else if (em.HasComponent<TripleQubitGate>(gate) && !em.HasComponent<DampingGateComponent>(gate))
+                {
+                    ExecuteTripleQubitGate(em, em.GetComponentData<TripleQubitGate>(gate));
+                }
+
+                // Physical rotation quaternion to quantum state mapping
+                Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
+                {
+                    if (quantumState.Locked == 0)
+                    {
+                        var coords = ExtraMath.QuaternionToSpherical(rotation.Value);
+                        quantumState.Alpha = math.cos(coords.Theta / 2);
+                        quantumState.Beta = math.sqrt(1 - math.pow(quantumState.Alpha, 2));
+                    }
+                });
+            }
+        }
 
         private void IterateOverGates()
         {
@@ -96,27 +125,11 @@ namespace QCS
 
                 if (em.HasComponent<NoisyChannel>(gate))
                 {
-                    Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState, ref NoiseComponent noiseComponent) =>
+                    //var x = 5;
+                    Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
                     {
-                        //var randAxis = Random.Range(0, 2);
-                        // generating random angle for simplicity for now.
-                        //var randAngle = Random.Range(0, 90);
-
-                        var randAxis = 0;
-                        var randAngle = 1f;
-
-                        switch (randAxis)
-                        {
-                            case 0:
-                                Gates.ApplyRxGate(ref rotation, randAngle);
-                                break;
-                            case 1:
-                                Gates.ApplyRyGate(ref rotation, randAngle);
-                                break;
-                            case 2:
-                                Gates.ApplyRzGate(ref rotation, randAngle);
-                                break;
-                        }
+                        Gates.ApplyPhaseDampingGate(ref rotation, ExtraMath.RandomGaussian(20, 0));
+                        QuantumNoiseSystem.ApplyAmplitudeDamping(0.1f, ref quantumState, ref rotation);
                     });
                 }
 
@@ -126,7 +139,6 @@ namespace QCS
                     if (quantumState.Locked == 0)
                     {
                         var coords = ExtraMath.QuaternionToSpherical(rotation.Value);
-                        // TODO: (Luke) Check if alpha is for 0 or 1
                         quantumState.Alpha = math.cos(coords.Theta / 2);
                         quantumState.Beta = math.sqrt(1 - math.pow(quantumState.Alpha, 2));
                     }
@@ -166,8 +178,16 @@ namespace QCS
                             statevector[currentQubit] = 1;
                         }
                     }
+                    currentQubit++;
                 }
             });
+
+            for(int i = 0; i < statevector.Length / 2; i++)
+            {
+                int tmp = statevector[i];
+                statevector[i] = statevector[statevector.Length - i - 1];
+                statevector[statevector.Length - i - 1] = tmp;
+            }
 
             return statevector;
         }

@@ -30,5 +30,22 @@ namespace Tests
 
             var val = ExtraMath.PickValueFromAmplitudes(stateAmps, states);
         }
+
+        [Test]
+        public void MatrixMulTest()
+        {
+            float[,] matrix = new float[2, 2] { {7,2}, {0,3}};
+            float[] vector = new float[2] {4, 1};
+
+            var result = ExtraMath.Matrix2x2VectorMultiplication(matrix, vector);
+            if(result[0] == 30 && result[1] == 3)
+            {
+                Assert.Pass();
+            }
+            else
+            {
+                Assert.Fail();
+            }
+        }
     }
 }
