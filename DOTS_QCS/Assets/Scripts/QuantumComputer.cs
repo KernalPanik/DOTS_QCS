@@ -12,6 +12,7 @@ namespace QCS
 {
     public class QuantumComputer : MonoBehaviour
     {
+        public static bool noiseEnabled = false;
         private EntityManager entityManager;
         public static int LogicalQubitCount = 0;
         private int QubitCount = 0;
@@ -25,9 +26,7 @@ namespace QCS
         {
             entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-            //SanityCheck();
-
-            //InitialTest_NoEncoding_AmpDamping();
+            InitialTest_NoEncoding_AmpDamping();
             //InitialTest_NoEncoding_PhaseDamping();
             //InitialTest_BitFlip_AmpDamping();
             //InitialTest_BitFlip_PhaseDamping();
@@ -50,8 +49,8 @@ namespace QCS
             //FiveQubit_PhaseFlip_PhaseDamping();
             //FiveQubit_PhaseFlip_AmpDamping();
 
-            //Enable errors for this
-            FourQubit_RandomError();
+            //Enable random errors for this
+            //FourQubit_RandomError();
             //FiveQubit_RandomError();
             //FourQubit_RandomError_ShorEncodedQubit();
         }

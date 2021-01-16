@@ -123,7 +123,7 @@ namespace QCS
                     ExecuteTripleQubitGate(em, em.GetComponentData<TripleQubitGate>(gate));
                 }
 
-                if (em.HasComponent<NoisyChannel>(gate))
+                if (em.HasComponent<NoisyChannel>(gate) && QuantumComputer.noiseEnabled)
                 {
                     //var x = 5;
                     Entities.ForEach((Entity entity, ref Rotation rotation, ref QuantumState quantumState) =>
