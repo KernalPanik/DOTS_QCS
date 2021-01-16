@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace QCS
 {
+
     public struct SphericalCoords
     {
         public float Theta;
@@ -15,6 +16,9 @@ namespace QCS
 
     public static class ExtraMath
     {
+        //static System.Random randm = new System.Random((int)DateTime.Now.Ticks & 0x0000FFFF);
+
+
         /// <summary>
         /// A method that converts a given quaternion into spherical coordinates (theta & phi) by 
         /// calculating a direction vector and translating it's coordinates into theta and phi //TODO: rework doc
@@ -171,8 +175,8 @@ namespace QCS
                 });
 
             // Generate random number between 0, 99
-            System.Random rand = new System.Random();
-            var randomNum = (rand.NextDouble() * 99f) / 100f;
+            System.Random randm = new System.Random();
+            var randomNum = (randm.NextDouble() * 99f) / 100f;
 
             // Pick a state based on random number
             int pickedState = 0;
@@ -184,10 +188,10 @@ namespace QCS
                     pickedState = stateAmpPair.Key;
                     break;
                 }
-                else if (randomNum > largestState)
+                else if (randomNum > stateAmpPair.Value)
                 {
-                    pickedState = stateAmpPair.Key;
-                    break;
+                    //tempAmp = stateAmpPair.Value;
+                    randomNum -= stateAmpPair.Value;
                 }
                 else
                 {
@@ -196,6 +200,57 @@ namespace QCS
             }
 
             return pickedState;
+        }
+
+        public static float[] Matrix2x2VectorMultiplication(float[,] matrix, float[]vector)
+        {
+            float[] result = new float[2];
+            result[0] = matrix[0, 0] * vector[0] + matrix[0, 1] * vector[1];
+            result[1] = matrix[1, 0] * vector[0] + matrix[1, 1] * vector[1];
+            return result;
+        }
+
+        public static float[] VectorizeQuantumState(float alpha, float beta)
+        {
+            return new float[2] { alpha, beta };
+        }
+        
+        /// <summary>
+        /// Generate a random value using Box-Mueller method
+        /// </summary>
+        public static float RandomGaussian(float deviation, float mean)
+        {
+            double t = 0f;
+            double x, w1, w2, r;
+
+            System.Random rand = new System.Random();
+
+            if(t == 0)
+            {
+                do
+                {
+                    w1 = 2.0 * rand.NextDouble() - 1.0;
+                    w2 = 2.0 * rand.NextDouble() - 1.0;
+                    r = w1 * w1 + w2 * w2;
+                } while (r >= 1.0);
+
+                r = Math.Sqrt(-2.0 * Math.Log(r) / r);
+
+                float result = mean + (float)(r * w1) * deviation;
+
+                return result;
+            }
+            return 0;
+        }
+
+        public static float NextGauss(float deviation, float mean, float min, float max)
+        {
+            float x;
+            do
+            {
+                x = RandomGaussian(deviation, mean);
+            } while (x < min || x > max);
+            return x;
         }
     }
 }

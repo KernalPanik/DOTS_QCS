@@ -21,7 +21,11 @@ public enum GateCodes
     TOFFOLI = 5,
     T = 6,
     T_ = 7,
-    RY = 8
+    RY = 8,
+    AMP_DAMP = 9,
+    PHS_DAMP = 10,
+    RZ = 11,
+    RX = 12
 }
 
 public static class Gates
@@ -47,11 +51,26 @@ public static class Gates
             case (int)GateCodes.X:
                 ApplyX(ref qubitRotation);
                 break;
+            case (int)GateCodes.RZ:
+                ApplyRzGate(ref qubitRotation, 180);
+                break;
+            case (int)GateCodes.RX:
+                ApplyRxGate(ref qubitRotation, 180);
+                break;
+            case (int)GateCodes.RY:
+                ApplyRyGate(ref qubitRotation, 180);
+                break;
             case (int)GateCodes.HADAMARD:
-                ApplyHadamard(ref qubitRotation);
+                ApplyHadamard(ref qubitRotation, ref qubitQuantumState);
                 break;
             case (int)GateCodes.MEASUREMENT:
                 classicalData = ApplyMeasurement(ref qubitRotation, ref qubitQuantumState);
+                break;
+            case (int)GateCodes.AMP_DAMP:
+                ApplyAmplitudeDampingGate(ref qubitRotation, ref qubitQuantumState);
+                break;
+            case (int)GateCodes.PHS_DAMP:
+                ApplyPhaseDampingGate(ref qubitRotation);
                 break;
             default:
                 throw new KeyNotFoundException("Gate code is not found");
@@ -74,7 +93,7 @@ public static class Gates
             case (int)GateCodes.CNOT:
                 var targetRotation = em.GetComponentData<Rotation>(targetQubit);
                 var controlState = em.GetComponentData<QuantumState>(controlQubit);
-                ApplyCNOT(in controlState, ref targetRotation);
+                ApplyCNOT(ref controlState, ref targetRotation);
                 em.SetComponentData(targetQubit, targetRotation);
             break;
             default:
@@ -134,10 +153,10 @@ public static class Gates
     /// <summary>
     /// Apply Hadamard gate
     /// </summary>
-    public static void ApplyHadamard(ref Rotation qubitRotation)
+    public static void ApplyHadamard(ref Rotation qubitRotation, ref QuantumState quantumState)
     {
-        qubitRotation.Value = math.mul(math.normalizesafe(qubitRotation.Value), quaternion.RotateZ(math.PI/2));
         qubitRotation.Value = math.mul(math.normalizesafe(qubitRotation.Value), quaternion.RotateY(math.PI));
+        qubitRotation.Value = math.mul(math.normalizesafe(qubitRotation.Value), quaternion.RotateZ(math.PI/2));
     }
 
     /// <summary>
@@ -145,9 +164,8 @@ public static class Gates
     /// This gate requires to know state of the control qubit and the rotation of the target,
     /// so passing only them
     /// </summary>
-    public static void ApplyCNOT(in QuantumState controlState, ref Rotation targetRotation)
+    public static void ApplyCNOT(ref QuantumState controlState, ref Rotation targetRotation)
     {
-        // TODO: (Luke) figuring out states and their amps will can be wrapped in a function
         float[] stateAmps = new float[] { controlState.Alpha, controlState.Beta };
         int[] states = new int[] { 0, 1 };
         float2 stateFromAmplitudes = ExtraMath.PickValueFromAmplitudes(stateAmps, states);
@@ -211,7 +229,7 @@ public static class Gates
 
     public static void ApplyRyGate(ref Rotation target, float angle)
     {
-        target.Value = math.mul(math.normalizesafe(target.Value), quaternion.RotateY(angle));
+        target.Value = math.mul(math.normalizesafe(target.Value), quaternion.RotateZ(angle));
     }
 
     public static void ApplyRxGate(ref Rotation target, float angle)
@@ -221,6 +239,18 @@ public static class Gates
 
     public static void ApplyRzGate(ref Rotation target, float angle)
     {
-        target.Value = math.mul(math.normalizesafe(target.Value), quaternion.RotateZ(angle));
+        target.Value = math.mul(math.normalizesafe(target.Value), quaternion.RotateY(angle));
+    }
+
+    public static void ApplyAmplitudeDampingGate(ref Rotation target, ref QuantumState quantumState, float rate = 0.5f)
+    {
+        QuantumNoiseSystem.ApplyAmplitudeDamping(rate, ref quantumState, ref target);
+    }
+
+    public static void ApplyPhaseDampingGate(ref Rotation target, float angle = 5f)
+    {
+        // delegate the behavior to the Rz, as it is basically the same.
+        angle = ExtraMath.NextGauss(60, 0, -180, 180);
+        ApplyRyGate(ref target, angle);
     }
 }
